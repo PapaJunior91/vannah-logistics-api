@@ -62,12 +62,6 @@ class AppHelper
                 continue;
             }
 
-            if($keys[$i] == 'stream')
-                $key = 'ClassHasStreams'.'.'.$keys[$i];
-
-            if($keys[$i] == 'className')
-                $key = 'Classes.name';
-
             $conditions[$key] =  $val;
         }
         

@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Api;
 
+use Carbon\Carbon;
 use App\Models\Branch;
 use App\Models\Client;
 use App\Models\Delivery;
@@ -59,8 +60,8 @@ class DeliveryController extends Controller
         $reciever_details = [
             'first_name' => $request->reciever_first_name,
             'last_name' => $request->reciever_last_name,
-            'phone' => $request->sender_phone,
-            'email' => $request->sender_email
+            'phone' => $request->reciever_phone,
+            'email' => $request->reciever_email
         ];
         
         DB::transaction(function() use($sender_details, $reciever_details, $request){
@@ -91,10 +92,24 @@ class DeliveryController extends Controller
 
         });
 
-        return AppHelper::instance()->apiResponse(
-            true,
-            'Delivery Created Successfully',
-        );
+        $reciever = [
+            $request->sender_phone,
+            $request->reciever_phone
+        ];
+
+        // send notification
+        return $this->sendSMSNotification();
+
+        // if($is_notification_sent == 0){
+        //     $response_message = "SMS Sent Successfully";
+        // }else{
+        //     $response_message = "Failed To Sent SMS";
+        // }
+
+        // return AppHelper::instance()->apiResponse(
+        //     true,
+        //     'Delivery Created Successfully, '.$response_message,
+        // );
 
     }
 
@@ -126,9 +141,63 @@ class DeliveryController extends Controller
         )
         ->get();
 
+        $current_date = Carbon::now();
+
+        foreach($deliveries as $delivery)
+        {
+            $arrival_date = $delivery['arrival_date'];
+            $delivery_status = $delivery['delivery_status'];
+
+            if($current_date > $arrival_date && $delivery_status == 'on transit')
+                $delivery->delivery_status = "delayed";
+
+        }
+
         return AppHelper::instance()->apiResponse(
             true,
-            'Data Retrived Successfully',
+            'Data Retrieved Successfully',
+            $deliveries
+        );
+    }
+
+    public function filterDeliveries(Request $request)
+    {
+        $filters = AppHelper::instance()->customFilter($request->all(), 'deliveries');
+
+        $conditions = $filters[0]; 
+        $start_date = $filters[1];
+        $end_date   = $filters[2];
+
+        $deliveries = Delivery::orWhere($conditions)
+        ->leftjoin('clients as sender_table', 'sender_table.id', '=', 'deliveries.sender_id')
+        ->leftjoin('clients as reciever_table', 'reciever_table.id', '=', 'deliveries.reciever_id')
+        ->leftjoin('branches as from_branch_table', 'from_branch_table.id', '=', 'deliveries.from_branch_id')
+        ->leftjoin('branches as to_branch_table', 'to_branch_table.id', '=', 'deliveries.to_branch_id')
+        ->leftjoin('couriers', 'couriers.id', '=', 'deliveries.courier_id')
+        ->select(
+            'sender_table.id as sender_id',
+            'sender_table.first_name as sender_first_name',
+            'sender_table.last_name as sender_last_name',
+            'sender_table.phone as sender_phone',
+            'sender_table.email as sender_email',
+            'reciever_table.id as reciever_id',
+            'reciever_table.first_name as reciever_first_name',
+            'reciever_table.last_name as reciever_last_name',
+            'reciever_table.phone as reciever_phone',
+            'reciever_table.email as reciever_email',
+            'from_branch_table.branch_name as from_branch_name',
+            'from_branch_table.region as from_region',
+            'to_branch_table.branch_name as to_branch_name',
+            'to_branch_table.region as to_region','couriers.phone',
+            'courier_name', 'couriers.address as courier_address', 
+            'couriers.region as courier_region', 'couriers.email as courier_email',
+            'deliveries.*'
+        )
+        ->get();
+
+        return AppHelper::instance()->apiResponse(
+            true,
+            'Data Retrieved Successfully',
             $deliveries
         );
     }
@@ -212,6 +281,18 @@ class DeliveryController extends Controller
     
     }
 
+    public function archiveDelivery(String $id)
+    {
+        $archive_delivery = Delivery::where('id', $id)->update([
+            'status' => 'inactive'
+        ]);
+
+        return AppHelper::instance()->apiResponse(
+            true,
+            'Delivery Archived Successfully'
+        );
+    }
+
     public function getTotalIncome()
     {
         $total_income = Delivery::sum('amount_paid');
@@ -230,5 +311,48 @@ class DeliveryController extends Controller
         $from_region = Branch::where('id', $from_branch_id)->pluck('region')->first();
         $to_region = Branch::where('id', $to_branch_id)->pluck('region')->first();
         return substr($from_region, 0, 3).'-'.substr($to_region, 0, 3).'-'. intval($last_insert_id) + 1;
+    }
+
+    private function sendSMSNotification($body=null, $reciever=null)
+    {
+        $basic  = new \Vonage\Client\Credentials\Basic("760b070e", "IgkytOQrWHi3f2QP");
+        $client = new \Vonage\Client($basic);
+
+        $response = $client->sms()->send(
+            new \Vonage\SMS\Message\SMS("+255788861149", "BRAND_NAME", 'A text message sent using the Nexmo SMS API')
+        );
+        
+        $message = $response->current();
+        
+        if ($message->getStatus() == 0) {
+            echo "The message was sent successfully\n";
+        } else {
+            echo "The message failed with status: " . $message->getStatus() . "\n";
+        }
+
+         //send invitation msg
+        //  $from     = 'VANNAH_LOGISTICS';
+        //  $body     = 'MerryGoRound Group Invitation. '.$inviter->firstName.' '.$inviter->lastName.' invites you to join '.$group->groupName;
+        //  $reciever = $request->phoneNumber;
+ 
+        //  $apiKey    = '760b070e';
+        //  $apiSecret = 'IgkytOQrWHi3f2QP';
+ 
+        //  $basic  = new \Vonage\Client\Credentials\Basic($apiKey, $apiSecret);
+        //  $client = new \Vonage\Client($basic);
+ 
+        //  $response = $client->sms()->send(
+        //      new \Vonage\SMS\Message\SMS($reciever, $from, $body)
+        //  );
+         
+        //  $message = $response->current();
+
+        //  return $message->getStatus();
+         
+        //  if ($message->getStatus() == 0) {
+        //      return response()->json(['status' => true, 'message' => 'Message sent successfully']);
+        //  } else {
+        //      return response()->json(['status' => false, 'message' => 'Message Not Sent']);             
+        //  } 
     }
 }

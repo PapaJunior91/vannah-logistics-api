@@ -55,4 +55,50 @@ class ClientController extends Controller
             $clients
         );
     }
+
+    public function updateClient(Request $request, $id)
+    {
+         // validate form data
+         $validate = Validator::make($request->all(), [
+            'first_name'    => 'nullable|alpha',
+            'last_name' => 'nullable|alpha',
+            'phone'     => 'nullable|string',
+            'email'     => 'nullable|string',
+            'address'   => 'nullable|string',
+            'region'    => 'nullable|string',
+        ])->stopOnFirstFailure(true);
+      
+        // send response in case validation fails
+        if ($validate->fails())
+            return AppHelper::instance()->apiResponse(
+                false, 
+                $validate->errors()->first(), 
+                '', 
+                Response::HTTP_UNPROCESSABLE_ENTITY
+            ); 
+
+        Client::where('id', $id)->update($request->all());
+
+        return AppHelper::instance()->apiResponse(
+            true,
+            'Client Updated Successfully',
+            '',
+            Response::HTTP_OK
+        );
+        
+    }
+
+    public function archiveClient(String $id)
+    {
+        Client::where('id', $id)->update([
+            'status' => 'inactive'
+        ]);
+
+        return AppHelper::instance()->apiResponse(
+            true,
+            'Client Archived Successfully'
+        );
+    }
+
+
 }

@@ -33,10 +33,14 @@ Route::get('couriers', [CourierController::class, 'getCouriers']);
 
 Route::post('clients', [ClientController::class, 'createClient']);
 Route::get('clients', [ClientController::class, 'getClients']);
+Route::put('clients/{id}', [ClientController::class, 'updateClient']);
+Route::put('archive-clients/{id}', [ClientController::class, 'archiveClient']);
 
 Route::post('deliveries', [DeliveryController::class, 'createDelivery']);
 Route::get('deliveries', [DeliveryController::class, 'getDeliveries']);
+Route::get('filter-deliveries', [DeliveryController::class, 'filterDeliveries']);
 Route::put('deliveries/{id}', [DeliveryController::class, 'updateDelivery']);
+Route::put('archive-deliveries/{id}', [DeliveryController::class, 'archiveDelivery']);
 
 Route::post('users', [UserController::class, 'createUser']);
 Route::get('users', [UserController::class, 'getUsers']);
