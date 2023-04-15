@@ -23,6 +23,7 @@ class Delivery extends Model
         'description', 
         'payment_option', 
         'amount_paid',
+        'created_by'
         
     ];
 }

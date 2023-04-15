@@ -2,12 +2,13 @@
 
 namespace App\Http\Controllers\Api;
 
-use App\Helpers\AppHelper;
+use App\Models\Branch;
 
+use App\Models\Region;
+use App\Helpers\AppHelper;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use App\Http\Controllers\Controller;
-use App\Models\Branch;
 use Illuminate\Support\Facades\Validator;
 
 class BranchController extends Controller
@@ -53,6 +54,17 @@ class BranchController extends Controller
             true,
             'Data Retrieved Successfully',
             $branches
+        );
+    }
+
+    public function getRegions()
+    {
+        $regions = Region::all();
+
+        return AppHelper::instance()->apiResponse(
+            true,
+            '',
+            $regions
         );
     }
 }
