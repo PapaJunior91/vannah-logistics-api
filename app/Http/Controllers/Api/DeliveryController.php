@@ -92,7 +92,7 @@ class DeliveryController extends Controller
 
         });
 
-        $reciever = [
+        $recievers = [
             $request->sender_phone,
             $request->reciever_phone
         ];
@@ -313,7 +313,7 @@ class DeliveryController extends Controller
         return substr($from_region, 0, 3).'-'.substr($to_region, 0, 3).'-'. intval($last_insert_id) + 1;
     }
 
-    private function sendSMSNotification($body=null, $reciever=null)
+    private function sendSMSNotification($body, $reciever)
     {
         $basic  = new \Vonage\Client\Credentials\Basic("760b070e", "IgkytOQrWHi3f2QP");
         $client = new \Vonage\Client($basic);

@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api;
 
 use Carbon\Carbon;
 use App\Models\User;
+use App\Models\Company;
 use App\Helpers\AppHelper;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
@@ -33,6 +34,8 @@ class AuthController extends Controller
             return AppHelper::instance()->apiResponse(false, 'Wrong Username Or Password');
 
         $user = Auth::user();
+
+        $user['company_info'] = Company::where('id', $user->company_id)->first();
 
         User::where('id', $user->id)->update([
             'last_login' => Carbon::now()

@@ -24,7 +24,7 @@ class AppHelper
         $file_name = mt_rand().'.'.$file_extension;
         $file->storeAs($folder, $file_name, 'public');
         $file_path = 'storage/'.$folder.'/' . $file_name;
-        return $file_path = env('APP_URL').'storage/'.$folder.'/' . $file_name;
+        return $file_path;
     }
 
     public function apiResponse($success, $msg = '', $data = [], $status = null)

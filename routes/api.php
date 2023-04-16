@@ -6,6 +6,7 @@ use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\UserController;
 use App\Http\Controllers\Api\BranchController;
 use App\Http\Controllers\Api\ClientController;
+use App\Http\Controllers\Api\CompanyController;
 use App\Http\Controllers\Api\CourierController;
 use App\Http\Controllers\Api\DeliveryController;
 
@@ -22,6 +23,9 @@ use App\Http\Controllers\Api\DeliveryController;
 
 
 Route::post('login', [AuthController::class, 'login']);
+
+Route::post('companies', [CompanyController::class, 'createCompany']);
+Route::get('companies/{id}', [CompanyController::class, 'getCompany']);
 
 Route::post('branches', [BranchController::class, 'createBranch']);
 Route::get('branches', [BranchController::class, 'getBranches']);
