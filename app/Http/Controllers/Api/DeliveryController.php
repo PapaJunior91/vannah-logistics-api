@@ -98,18 +98,18 @@ class DeliveryController extends Controller
         ];
 
         // send notification
-        return $this->sendSMSNotification();
+        $is_notification_sent = $this->sendSMSNotification($request->notification_message, $request->reciever_phone);
 
-        // if($is_notification_sent == 0){
-        //     $response_message = "SMS Sent Successfully";
-        // }else{
-        //     $response_message = "Failed To Sent SMS";
-        // }
+        if($is_notification_sent == 0){
+            $response_message = "SMS Sent Successfully";
+        }else{
+            $response_message = "Failed To Sent SMS";
+        }
 
-        // return AppHelper::instance()->apiResponse(
-        //     true,
-        //     'Delivery Created Successfully, '.$response_message,
-        // );
+        return AppHelper::instance()->apiResponse(
+            true,
+            'Delivery Created Successfully, '.$response_message,
+        );
 
     }
 
@@ -319,16 +319,16 @@ class DeliveryController extends Controller
         $client = new \Vonage\Client($basic);
 
         $response = $client->sms()->send(
-            new \Vonage\SMS\Message\SMS("+255788861149", "BRAND_NAME", 'A text message sent using the Nexmo SMS API')
+            new \Vonage\SMS\Message\SMS($reciever, "VANNAH LOGISTICS", $body)
         );
         
         $message = $response->current();
         
-        if ($message->getStatus() == 0) {
-            echo "The message was sent successfully\n";
-        } else {
-            echo "The message failed with status: " . $message->getStatus() . "\n";
-        }
+        // if ($message->getStatus() == 0) {
+        //     echo "The message was sent successfully\n";
+        // } else {
+        //     echo "The message failed with status: " . $message->getStatus() . "\n";
+        // }
 
          //send invitation msg
         //  $from     = 'VANNAH_LOGISTICS';
@@ -347,7 +347,7 @@ class DeliveryController extends Controller
          
         //  $message = $response->current();
 
-        //  return $message->getStatus();
+         return $message->getStatus();
          
         //  if ($message->getStatus() == 0) {
         //      return response()->json(['status' => true, 'message' => 'Message sent successfully']);
