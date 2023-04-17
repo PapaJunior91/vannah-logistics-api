@@ -27,6 +27,8 @@ Route::post('login', [AuthController::class, 'login']);
 Route::post('companies', [CompanyController::class, 'createCompany']);
 Route::get('companies/{id}', [CompanyController::class, 'getCompany']);
 
+Route::post('register', [UserController::class, 'registerUser']);
+
 Route::post('branches', [BranchController::class, 'createBranch']);
 Route::get('branches', [BranchController::class, 'getBranches']);
 
