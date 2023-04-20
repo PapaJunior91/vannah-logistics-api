@@ -24,6 +24,8 @@ use App\Http\Controllers\Api\DeliveryController;
 
 Route::post('login', [AuthController::class, 'login']);
 
+Route::get('payment-auth-redirect', [PaymentController::class, 'getAuth']);
+
 Route::post('companies', [CompanyController::class, 'createCompany']);
 Route::get('companies/{id}', [CompanyController::class, 'getCompany']);
 

@@ -9,6 +9,7 @@ use App\Helpers\AppHelper;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use App\Http\Controllers\Controller;
+use App\Models\Delivery;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Validator;
 
@@ -36,6 +37,7 @@ class AuthController extends Controller
         $user = Auth::user();
 
         $user['company_info'] = Company::where('id', $user->company_id)->first();
+        $user['today_deliveries_count'] = Delivery::where('arrival_date', Carbon::now()->toDateString())->count();
 
         User::where('id', $user->id)->update([
             'last_login' => Carbon::now()

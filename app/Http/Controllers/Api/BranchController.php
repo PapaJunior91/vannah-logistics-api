@@ -59,7 +59,7 @@ class BranchController extends Controller
 
     public function getRegions()
     {
-        $regions = Region::all();
+        $regions = Region::orderBy('region_name')->get();
 
         return AppHelper::instance()->apiResponse(
             true,
